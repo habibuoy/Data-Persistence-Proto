@@ -11,15 +11,24 @@ public class MenuUIManager : MonoBehaviour
 {
     public InputField nameInput;
     public Button playButton;
+    public Button highScoreButton;
     public GameObject warningText;
 
     // Start is called before the first frame update
     void Start()
     {
         nameInput.onValueChanged.AddListener(EvaluateNameInput);
+        highScoreButton.onClick.AddListener(DeleteHighScore);
 
         playButton.interactable = false;
         warningText.SetActive(false);
+
+        highScoreButton.interactable = false;
+
+        if (DataManager.Instance.LoadHighScore())
+        {
+            highScoreButton.interactable = true;
+        }
     }
     
     public void EvaluateNameInput(string name)
@@ -38,7 +47,7 @@ public class MenuUIManager : MonoBehaviour
 
     public void PlayButton()
     {
-        DataManager.Instance.playerName = nameInput.text;
+        DataManager.Instance.PlayerName = nameInput.text;
         SceneManager.LoadScene(1);
     }
 
@@ -51,6 +60,13 @@ public class MenuUIManager : MonoBehaviour
         Application.Quit();
 
         #endif
-        
+    }
+
+    public void DeleteHighScore()
+    {
+        if (DataManager.Instance.DeleteHighScore())
+        {
+            highScoreButton.interactable = false;
+        }
     }
 }

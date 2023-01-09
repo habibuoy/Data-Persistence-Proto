@@ -5,16 +5,16 @@ using UnityEngine;
 
 public class Ball : MonoBehaviour
 {
-    private Rigidbody m_Rigidbody;
+    private Rigidbody rb;
 
     void Start()
     {
-        m_Rigidbody = GetComponent<Rigidbody>();
+        rb = GetComponent<Rigidbody>();
     }
     
     private void OnCollisionExit(Collision other)
     {
-        var velocity = m_Rigidbody.velocity;
+        var velocity = rb.velocity;
         
         //after a collision we accelerate a bit
         velocity += velocity.normalized * 0.01f;
@@ -31,6 +31,6 @@ public class Ball : MonoBehaviour
             velocity = velocity.normalized * 3.0f;
         }
 
-        m_Rigidbody.velocity = velocity;
+        rb.velocity = velocity;
     }
 }
