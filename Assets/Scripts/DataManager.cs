@@ -2,17 +2,22 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using System.IO;
+using System;
 
 public class DataManager : MonoBehaviour
 {
     public static DataManager Instance {get; private set;}
     public string PlayerName { get => playerName; set => playerName = value; }
-    public HighScore HighScoreData { get => highScoreData; set => highScoreData = value; }
+    public List<PlayerScore> PlayerScoreData { get => playerScoreData; set => playerScoreData = value; }
+    public PlayerScore BestScore { get => bestScore; set => bestScore = value; }
 
     private string playerName;
-    private HighScore highScoreData;
+    private List<PlayerScore> playerScoreData;
+    private PlayerScore bestScore;
 
-    private const string HighScoreFileName = "/high_score.json";
+    private const string ScoresFileName = "/player_scores.json";
+
+    private string scoresPath;
     
     private void Awake() {
 
@@ -26,39 +31,37 @@ public class DataManager : MonoBehaviour
             Destroy(gameObject);
         }
 
-        if (HighScoreData == null) HighScoreData = new HighScore("", 0);
+        if (playerScoreData == null) playerScoreData = new List<PlayerScore>();
+
+        scoresPath = Application.persistentDataPath + ScoresFileName;
+        LoadScores();
+
+        BestScore = GetBestScore();
     }
 
     private void Start() {
         
     }
 
-    public void LoadScores()
+    public bool LoadScores()
     {
-
-    }
-
-    public void SaveHighScore()
-    {
-        // HighScore highScore = new HighScore(playerName, score);
-        string json = JsonUtility.ToJson(HighScoreData);
-
-        string path = Application.persistentDataPath + HighScoreFileName;
-        File.WriteAllText(path, json);
-        Debug.Log("Successfully saved high score");
-    }
-
-    public bool LoadHighScore()
-    {
-        string path = Application.persistentDataPath + HighScoreFileName;
-
-        if (File.Exists(path))
+        if (File.Exists(scoresPath))
         {
-            string scoreFile = File.ReadAllText(path);
+            string scoreFile = File.ReadAllText(scoresPath);
+
+            Scores scoreData = JsonUtility.FromJson<Scores>(scoreFile);
+
+            playerScoreData.Clear();
             
-            HighScoreData = JsonUtility.FromJson<HighScore>(scoreFile);
-            
-            Debug.Log("Successfully loaded high score: " + HighScoreData.playerName + " - " + HighScoreData.score);
+            foreach (PlayerScore score in scoreData.data) // remove duplicate data
+            {
+                if (!playerScoreData.Contains(score))
+                {
+                    playerScoreData.Add(score);
+                }
+            }
+
+            // Debug.Log("Successfully loaded scores");
 
             return true;
         }
@@ -66,17 +69,36 @@ public class DataManager : MonoBehaviour
         return false;
     }
 
-    public bool DeleteHighScore()
+    public void SaveScore(PlayerScore playerScore)
     {
-        string path = Application.persistentDataPath + HighScoreFileName;
-
-        if (File.Exists(path))
+        if (playerScoreData.Contains(playerScore))
         {
-            File.Delete(path);
-            highScoreData.playerName = "";
-            highScoreData.score = 0;
+            int index = playerScoreData.IndexOf(playerScore);
+            int oldScore = playerScoreData[index].score;
+            int newScore = playerScore.score;
+            playerScoreData[index].score = oldScore > newScore ? oldScore : newScore; // save if new score is higher than the old score
+        }
+        else
+        {
+            playerScoreData.Add(playerScore);
+        }
+
+        Scores scoreData = new Scores();
+        scoreData.data = playerScoreData;
+        string json = JsonUtility.ToJson(scoreData, true);
+        File.WriteAllText(scoresPath, json);
+
+        // Debug.Log("Successfully saved scores");
+    }
+
+    public bool DeleteScores()
+    {
+        if (File.Exists(scoresPath))
+        {
+            File.Delete(scoresPath);
+            playerScoreData.Clear();
             
-            Debug.Log("Successfully deleted high score");
+            Debug.Log("Successfully deleted all scores");
 
             return true;
         }
@@ -84,21 +106,56 @@ public class DataManager : MonoBehaviour
         return false;
     }
     
-    public HighScore GetHighScoreData()
+    public PlayerScore GetBestScore()
     {
-        return HighScoreData;
+        if (playerScoreData == null || playerScoreData.Count == 0) return null;
+
+        // int highestScore = int.MinValue;
+        PlayerScore playerHighestScore = new PlayerScore();
+
+        foreach (PlayerScore ps in playerScoreData)
+        {
+            if (ps.score > playerHighestScore.score)
+            {
+                playerHighestScore = ps;
+            }
+        }
+
+        return playerHighestScore;
     }
 
-    public class HighScore
+    [System.Serializable]
+    public class Scores
     {
-        
-        public string playerName;
+        public List<PlayerScore> data;
+    }
+
+    [System.Serializable]
+    public class PlayerScore
+    {
+        public string name;
         public int score;
 
-        public HighScore(string playerName, int score)
+        public override bool Equals(object obj)
         {
-            this.playerName = playerName;
-            this.score = score;
+            if (obj == null || GetType() != obj.GetType())
+            {
+                return false;
+            }
+
+            PlayerScore o = obj as PlayerScore;
+
+            if (o == null)
+            {
+                return false;
+            }
+
+            return o.name.Equals(this.name);
+        }
+
+        public override int GetHashCode()
+        {
+            return HashCode.Combine(name, score);
         }
     }
 }

@@ -37,9 +37,9 @@ public class MainManager : MonoBehaviour
             }
         }
 
-        DataManager.HighScore highScore = DataManager.Instance.GetHighScoreData();
+        DataManager.PlayerScore best = DataManager.Instance.GetBestScore();
 
-        UpdateBestScore(highScore.playerName, highScore.score);
+        UpdateBestScore(best.name, best.score);
     }
 
     private void Update()
@@ -82,24 +82,19 @@ public class MainManager : MonoBehaviour
         isGameOver = true;
         gameOverPanel.SetActive(true);
 
-        if (IsCurrentPointHighest())
-        {
-            DataManager.Instance.HighScoreData.playerName = DataManager.Instance.PlayerName;
-            DataManager.Instance.HighScoreData.score = score;
-            DataManager.Instance.SaveHighScore();
-        }
+        DataManager.Instance.SaveScore(new DataManager.PlayerScore(){name = DataManager.Instance.PlayerName, score = score});
     }
 
     private bool IsCurrentPointHighest()
     {
-        return score > DataManager.Instance.GetHighScoreData().score;
+        return score > DataManager.Instance.BestScore.score;
     }
 
     private void UpdateBestScore(string name, int score)
     {
         string text = "Best Score: " +  name + " | " + score;
 
-        if (name.Length == 0 && score == 0)
+        if (string.IsNullOrEmpty(name) && score == 0)
         {
             text = "No Best Score Yet";
         }
