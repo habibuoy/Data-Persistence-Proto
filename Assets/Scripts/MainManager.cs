@@ -54,7 +54,7 @@ public class MainManager : MonoBehaviour
                 forceDir.Normalize();
 
                 ball.transform.SetParent(null);
-                ball.AddForce(forceDir * 2.0f, ForceMode.VelocityChange);
+                ball.AddForce(forceDir * 2.0f * DataManager.Instance.GetDifficulty.value, ForceMode.VelocityChange);
             }
         }
         else if (isGameOver)
@@ -68,7 +68,7 @@ public class MainManager : MonoBehaviour
 
     void AddPoint(int point)
     {
-        score += point;
+        score += point * DataManager.Instance.GetDifficulty.value;
         scoreText.text = $"Score : {score}";
 
         if (IsCurrentPointHighest())
@@ -82,7 +82,7 @@ public class MainManager : MonoBehaviour
         isGameOver = true;
         gameOverPanel.SetActive(true);
 
-        DataManager.Instance.SaveScore(new DataManager.PlayerScore(){name = DataManager.Instance.PlayerName, score = score});
+        DataManager.Instance.SaveScore(new DataManager.PlayerScore(){name = DataManager.Instance.PlayerName, score = score, difficulty = DataManager.Instance.GetDifficulty.name});
     }
 
     private bool IsCurrentPointHighest()
@@ -92,7 +92,7 @@ public class MainManager : MonoBehaviour
 
     private void UpdateBestScore(string name, int score)
     {
-        string text = "Best Score: " +  name + " | " + score;
+        string text = "Best Score: " +  name + " | " + score + " | " + DataManager.Instance.GetDifficulty.name;
 
         if (string.IsNullOrEmpty(name) && score == 0)
         {

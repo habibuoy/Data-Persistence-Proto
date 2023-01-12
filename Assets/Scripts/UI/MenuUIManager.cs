@@ -17,27 +17,67 @@ public class MenuUIManager : MonoBehaviour
     public GameObject scoreBoxPrefab;
     public GameObject scorePanel;
 
+    public Color[] colors;
+    public GameObject colorButtons;
+    private List<Button> buttons;
+    public GameObject buttonPrefab;
+
+    public DifficultyPicker difficultyPicker;
+
+    private int difficultyValue;
+    private string playerName;
+
     // Start is called before the first frame update
     void Start()
     {
-        nameInput.onValueChanged.AddListener(EvaluateNameInput);
-        scoreBoardButton.onClick.AddListener(ScoresButton);
-
+        difficultyPicker.Init(this);
         playButton.interactable = false;
         warningText.SetActive(false);
+
+        // buttons = new List<Button>();
+        // SetupColorButtons();
+    }
+
+    private void OnEnable() {
+        nameInput.onValueChanged.AddListener(EvaluateNameInput);
+        scoreBoardButton.onClick.AddListener(ScoresButton);
+    }
+
+    private void OnDisable() {
+        nameInput.onValueChanged.RemoveListener(EvaluateNameInput);
+        scoreBoardButton.onClick.RemoveListener(ScoresButton);
+    }
+
+    public void SetDifficulty(int value)
+    {
+        difficultyValue = value;
+        HandlePlayButton();
     }
     
     public void EvaluateNameInput(string name)
     {
         if (name.Length > 3)
         {
-            playButton.interactable = true;
+            // playButton.interactable = true;
             warningText.SetActive(false);
         }
         else
         {
-            playButton.interactable = false;
+            // playButton.interactable = false;
             warningText.SetActive(true);
+        }
+        HandlePlayButton();
+    }
+
+    public void HandlePlayButton()
+    {
+        if (name.Length < 3 || difficultyValue == 0)
+        {
+            playButton.interactable = false;
+        }
+        else if (name.Length > 3 && difficultyValue > 0)
+        {
+            playButton.interactable = true;
         }
     }
 
@@ -58,7 +98,7 @@ public class MenuUIManager : MonoBehaviour
             for (int i = 0; i < tempScores.Count; i++)
             {
                 Text scoreText = Instantiate(scoreBoxPrefab, content).GetComponentInChildren<Text>();
-                scoreText.text = (i + 1) + ". " + tempScores[i].name + " | " + tempScores[i].score;
+                scoreText.text = (i + 1) + ". " + tempScores[i].name + " | " + tempScores[i].score + " | " + tempScores[i].difficulty;
             }
 
             Debug.Log("There are " + tempScores.Count + " scores");
@@ -90,6 +130,7 @@ public class MenuUIManager : MonoBehaviour
     public void PlayButton()
     {
         DataManager.Instance.PlayerName = nameInput.text;
+        DataManager.Instance.SaveDifficulty();
         SceneManager.LoadScene(1);
     }
 
@@ -111,4 +152,33 @@ public class MenuUIManager : MonoBehaviour
             scoreBoardButton.interactable = false;
         }
     }
+
+    // private void SetupColorButtons()
+    // {
+    //     foreach (Color c in colors)
+    //     {
+    //         Button b = Instantiate(buttonPrefab, colorButtons.transform).GetComponent<Button>();
+    //         b.GetComponent<Image>().color = c;
+    //         b.onClick.AddListener(() => {
+    //             SetColor(c);
+    //             foreach (Button b in buttons)
+    //             {
+    //                 b.interactable = true;
+    //             }
+    //             b.interactable = false;
+    //         });
+
+    //         buttons.Add(b);
+    //     }
+
+    //     // for (int i = 0; i < colors.Length; i++)
+    //     // {
+    //     //     buttons[i].GetComponent<Image>().color = colors[i];
+    //     // }
+    // }
+
+    // public void SetColor(Color c)
+    // {
+    //     DataManager.Instance.chosenColor = c;
+    // }
 }

@@ -10,14 +10,21 @@ public class DataManager : MonoBehaviour
     public string PlayerName { get => playerName; set => playerName = value; }
     public List<PlayerScore> PlayerScoreData { get => playerScoreData; set => playerScoreData = value; }
     public PlayerScore BestScore { get => bestScore; set => bestScore = value; }
+    public Difficulty GetDifficulty { get => difficulty; private set => difficulty = value; }
 
     private string playerName;
     private List<PlayerScore> playerScoreData;
     private PlayerScore bestScore;
 
+    public Color chosenColor;
+
+    private Difficulty difficulty;
+
     private const string ScoresFileName = "/player_scores.json";
+    private const string DifficultyFileName = "/game_difficulty.json";
 
     private string scoresPath;
+    private string difficultyPath;
     
     private void Awake() {
 
@@ -32,15 +39,14 @@ public class DataManager : MonoBehaviour
         }
 
         if (playerScoreData == null) playerScoreData = new List<PlayerScore>();
+        if (difficulty == null) difficulty = new Difficulty();
 
         scoresPath = Application.persistentDataPath + ScoresFileName;
+        difficultyPath = Application.persistentDataPath + DifficultyFileName;
         LoadScores();
+        LoadDifficulty();
 
         BestScore = GetBestScore();
-    }
-
-    private void Start() {
-        
     }
 
     public bool LoadScores()
@@ -76,7 +82,11 @@ public class DataManager : MonoBehaviour
             int index = playerScoreData.IndexOf(playerScore);
             int oldScore = playerScoreData[index].score;
             int newScore = playerScore.score;
+            string oldDifficulty = playerScoreData[index].difficulty;
+            string newDifficulty = difficulty.name;
+
             playerScoreData[index].score = oldScore > newScore ? oldScore : newScore; // save if new score is higher than the old score
+            playerScoreData[index].difficulty = string.Equals(oldDifficulty, newDifficulty) ? oldDifficulty : newDifficulty; // save if difficulty is different
         }
         else
         {
@@ -105,6 +115,25 @@ public class DataManager : MonoBehaviour
 
         return false;
     }
+
+    public void SaveDifficulty()
+    {
+        string json = JsonUtility.ToJson(difficulty, true);
+        File.WriteAllText(difficultyPath, json);
+    }
+
+    public bool LoadDifficulty()
+    {
+        if (File.Exists(difficultyPath))
+        {
+            string difficultyFile = File.ReadAllText(difficultyPath);
+            JsonUtility.FromJsonOverwrite(difficultyFile, difficulty);
+
+            return true;
+        }
+
+        return false;
+    }
     
     public PlayerScore GetBestScore()
     {
@@ -124,6 +153,11 @@ public class DataManager : MonoBehaviour
         return playerHighestScore;
     }
 
+    public void SelectDifficulty(Difficulty difficulty)
+    {
+        this.GetDifficulty = difficulty;
+    }
+
     [System.Serializable]
     public class Scores
     {
@@ -135,6 +169,7 @@ public class DataManager : MonoBehaviour
     {
         public string name;
         public int score;
+        public string difficulty;
 
         public override bool Equals(object obj)
         {
@@ -157,5 +192,14 @@ public class DataManager : MonoBehaviour
         {
             return HashCode.Combine(name, score);
         }
+    }
+
+    [System.Serializable]
+    public class Difficulty
+    {
+        public string name;
+        public int value;
+        public string description;
+        public Color textColor;
     }
 }
