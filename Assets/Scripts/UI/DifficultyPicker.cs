@@ -22,7 +22,8 @@ public class DifficultyPicker : MonoBehaviour
         int difficultyValue = 1;
         if (DataManager.Instance.GetDifficulty.value > 0)
         {
-            SelectDifficulty(DataManager.Instance.GetDifficulty.value);
+            // SelectDifficulty(DataManager.Instance.GetDifficulty.value);
+            difficultyValue = DataManager.Instance.GetDifficulty.value;
         }
 
         SelectDifficulty(difficultyValue);

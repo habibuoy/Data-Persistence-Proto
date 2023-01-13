@@ -32,8 +32,7 @@ public class MenuUIManager : MonoBehaviour
         warningText.SetActive(false);
         scoreButtonDefaultPosition = scoreBoardButton.GetComponent<RectTransform>().position;
 
-        // buttons = new List<Button>();
-        // SetupColorButtons();
+        DataManager.Instance.LoadDifficulty();
     }
 
     private void OnEnable() {
