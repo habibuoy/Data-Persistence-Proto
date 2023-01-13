@@ -27,12 +27,15 @@ public class MenuUIManager : MonoBehaviour
     private int difficultyValue;
     private string playerName;
 
+    private Vector3 scoreButtonDefaultPosition;
+
     // Start is called before the first frame update
     void Start()
     {
         difficultyPicker.Init(this);
         playButton.interactable = false;
         warningText.SetActive(false);
+        scoreButtonDefaultPosition = scoreBoardButton.GetComponent<RectTransform>().position;
 
         // buttons = new List<Button>();
         // SetupColorButtons();
@@ -118,12 +121,17 @@ public class MenuUIManager : MonoBehaviour
         {
             scorePanel.SetActive(false);
             scoreBoardButton.GetComponentInChildren<Text>().text = "Show Score Board";
+            scoreBoardButton.GetComponent<RectTransform>().position = scoreButtonDefaultPosition;
         }
         else
         {
             LoadScores();
             scorePanel.SetActive(true);
             scoreBoardButton.GetComponentInChildren<Text>().text = "Close";
+            scoreBoardButton.GetComponent<RectTransform>().position = new Vector2(
+                scoreButtonDefaultPosition.x,
+                scoreButtonDefaultPosition.y - 170f
+            );
         }
     }
 
