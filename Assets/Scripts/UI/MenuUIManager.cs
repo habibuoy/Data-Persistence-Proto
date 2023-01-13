@@ -17,11 +17,6 @@ public class MenuUIManager : MonoBehaviour
     public GameObject scoreBoxPrefab;
     public GameObject scorePanel;
 
-    public Color[] colors;
-    public GameObject colorButtons;
-    private List<Button> buttons;
-    public GameObject buttonPrefab;
-
     public DifficultyPicker difficultyPicker;
 
     private int difficultyValue;
@@ -160,33 +155,4 @@ public class MenuUIManager : MonoBehaviour
             scoreBoardButton.interactable = false;
         }
     }
-
-    // private void SetupColorButtons()
-    // {
-    //     foreach (Color c in colors)
-    //     {
-    //         Button b = Instantiate(buttonPrefab, colorButtons.transform).GetComponent<Button>();
-    //         b.GetComponent<Image>().color = c;
-    //         b.onClick.AddListener(() => {
-    //             SetColor(c);
-    //             foreach (Button b in buttons)
-    //             {
-    //                 b.interactable = true;
-    //             }
-    //             b.interactable = false;
-    //         });
-
-    //         buttons.Add(b);
-    //     }
-
-    //     // for (int i = 0; i < colors.Length; i++)
-    //     // {
-    //     //     buttons[i].GetComponent<Image>().color = colors[i];
-    //     // }
-    // }
-
-    // public void SetColor(Color c)
-    // {
-    //     DataManager.Instance.chosenColor = c;
-    // }
 }
